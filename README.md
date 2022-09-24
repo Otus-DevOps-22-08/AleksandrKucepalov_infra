@@ -26,7 +26,7 @@ ssh -i ~/.ssh/id_rsa -A kucepalov_as@178.154.204.211 -t ssh 10.128.0.3
 
 HW4
 
-testapp_IP = 130.193.51.12
+testapp_IP = 62.84.115.235
 testapp_port = 9292
 
 Команда для установки ВМ скриптом
