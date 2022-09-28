@@ -1,0 +1,7 @@
+{
+    "folder_id": "id",
+    "source_image_family": "ubuntu-1604-lts",
+	"service_account_key_file": "key.json",
+	"disk_size": "15",
+	"ssh_password": "ubuntu"
+}
