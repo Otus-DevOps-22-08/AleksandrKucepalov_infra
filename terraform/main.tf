@@ -1,20 +1,13 @@
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-}
-
 provider "yandex" {
-  token     = "y0_AgAAAAACi4cgAATuwQAAAADPj_rluMrQKE89QBm4fwoyg9HwJI1L7DE"
-  cloud_id  = "b1g1tp1j8r210ptjklqk"
-  folder_id = "b1guun0oobhpr809u2uu"
-  zone      = "ru-central1-a"
+  service_account_key_file = var.service_account_key_file
+  cloud_id                 = var.cloud_id
+  folder_id                = var.folder_id
+  zone                     = var.zone
 }
 
 resource "yandex_compute_instance" "app" {
-  name = "reddit-app-terraform"
+  #name = "reddit-app-terraform"
+  count = var.app_count
 
   resources {
     cores  = 2
@@ -23,33 +16,33 @@ resource "yandex_compute_instance" "app" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd8s9t4bg89s2rhqjlfl"
+      image_id = var.image_id
     }
   }
 
   network_interface {
-    subnet_id = "e9bqp2134effflfg7i7t"
+    subnet_id = var.subnet_id
     nat       = true
   }
+
   metadata = {
-  ssh-keys = "ubuntu:${file("C:/cygwin64/home/home/.ssh/appuser.pub")}"
+    ssh-keys = "ubuntu:${file(var.public_key_path)}"
   }
 
   connection {
-  type = "ssh"
-  host = yandex_compute_instance.app.network_interface.0.nat_ip_address
-  user = "ubuntu"
-  agent = false
-  private_key = file("C:/cygwin64/home/home/.ssh/appuser")
+    type        = "ssh"
+    host        = self.network_interface.0.nat_ip_address
+    user        = "ubuntu"
+    agent       = false
+    private_key = file(var.private_key_path)
   }
 
-
   provisioner "file" {
-  source = "files/puma.service"
-  destination = "/tmp/puma.service"
+    source      = "files/puma.service"
+    destination = "/tmp/puma.service"
   }
 
   provisioner "remote-exec" {
-  script = "files/deploy.sh"
+    script = "files/deploy.sh"
   }
 }
