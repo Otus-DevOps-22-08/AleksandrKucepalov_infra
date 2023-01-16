@@ -1,7 +1,9 @@
 {
-    "folder_id": "id",
-    "source_image_family": "ubuntu-1604-lts",
-	"service_account_key_file": "key.json",
-	"disk_size": "15",
-	"ssh_password": "ubuntu"
+  "key_file": "packer/key.json",
+  "folder_id": "folder-id",
+  "source_image_family": "source-image-family",
+  "image_family": "image-family",
+  "subnet_id": "subnet-id",
+  "disk_size_gb": "x",
+  "username": "username"
 }
