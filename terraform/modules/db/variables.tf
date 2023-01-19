@@ -1,4 +1,7 @@
-
+variable "db_disk_image" {
+  description = "Disk image for reddit db"
+  default = "reddit-db-base"
+}
 variable "public_key_path" {
   # Описание переменной
   description = "Path to the public key used for ssh access"
@@ -6,7 +9,11 @@ variable "public_key_path" {
 variable "subnet_id" {
   description = "Subnet"
 }
-variable db_disk_image {
-  description = "Disk image for reddit db"
-  default = "fd8432o1tb1q7ua2ruvt"
+variable private_key_path {
+  description = "path to private key"
+}
+variable "need_app_deploy" {
+  description = "Need to deploy app"
+  type = bool
+  default = false
 }
