@@ -1,3 +1,11 @@
+#terraform {
+#  required_providers {
+#    yandex = {
+#      source = "yandex-cloud/yandex"
+#    }
+#  }
+#  required_version = ">= 0.13"
+#}
 resource "yandex_compute_instance" "db" {
   name = "reddit-db"
   labels = {
@@ -16,11 +24,34 @@ resource "yandex_compute_instance" "db" {
   }
 
   network_interface {
+#    subnet_id = yandex_vpc_subnet.app-subnet.id
     subnet_id = var.subnet_id
     nat = true
   }
 
   metadata = {
-  ssh-keys = "ubuntu:${file(var.public_key_path)}"
+    ssh-keys = "ubuntu:${file(var.public_key_path)}"
+  }
+
+}
+resource "null_resource" "db" {
+  count = var.need_app_deploy ? 1 : 0
+  triggers = {
+    cluster_instance_ids = yandex_compute_instance.db.id
+  }
+  connection {
+    type        = "ssh"
+    host        = yandex_compute_instance.db.network_interface[0].nat_ip_address
+    user        = "ubuntu"
+    agent       = false
+    private_key = file(var.private_key_path)
+  }
+  provisioner "file" {
+    content     = templatefile("${path.module}/files/mongod.conf", { db_ip = yandex_compute_instance.db.network_interface.0.ip_address})
+    destination = "/tmp/mongod.conf"
+  }
+
+  provisioner "remote-exec" {
+    script = "${path.module}/files/deploy.sh"
   }
 }
