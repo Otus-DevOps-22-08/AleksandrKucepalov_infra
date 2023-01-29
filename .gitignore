@@ -1,6 +1,16 @@
+/.idea/
 /packer/variables.json
 *.tfstate
 *.tfstate.*.backup
 *.tfstate.backup
 *.tfvars
 .terraform/
+*.retry
+jdauphant.nginx
+/ansible/vault.key
+vagrant/
+*.log
+*.pyc
+.molecule
+.cache
+.pytest_cache

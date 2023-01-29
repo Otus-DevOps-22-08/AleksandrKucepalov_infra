@@ -1,15 +1,7 @@
-#terraform {
-#  required_providers {
-#    yandex = {
-#      source = "yandex-cloud/yandex"
-#    }
-#  }
-#  required_version = ">= 0.13"
-#}
-resource "yandex_compute_instance" "app" {
-  name = "reddit-app"
+resource "yandex_compute_instance" "db" {
+  name   = "reddit-db"
   labels = {
-    tags = "reddit-app"
+    tags = "reddit-db"
   }
 
   resources {
@@ -19,40 +11,38 @@ resource "yandex_compute_instance" "app" {
 
   boot_disk {
     initialize_params {
-      image_id = var.app_disk_image
+      image_id = var.db_disk_image
     }
   }
 
   network_interface {
-#    subnet_id = yandex_vpc_subnet.app-subnet.id
+    #    subnet_id = yandex_vpc_subnet.app-subnet.id
     subnet_id = var.subnet_id
-    nat = true
+    nat       = true
   }
 
   metadata = {
     ssh-keys = "ubuntu:${file(var.public_key_path)}"
   }
+
 }
-
-resource "null_resource" "app-deployment" {
-  count = var.need_app_deploy ? 1 : 0
-
+resource "null_resource" "db" {
+  count    = var.need_app_deploy ? 1 : 0
   triggers = {
-    app_vm_id = yandex_compute_instance.app.id
+    cluster_instance_ids = yandex_compute_instance.db.id
   }
-
   connection {
     type        = "ssh"
-    host        = yandex_compute_instance.app.network_interface.0.nat_ip_address
+    host        = yandex_compute_instance.db.network_interface[0].nat_ip_address
     user        = "ubuntu"
     agent       = false
-    # путь до приватного ключа
     private_key = file(var.private_key_path)
   }
-
   provisioner "file" {
-    content     = templatefile("${path.module}/files/puma.service.tmp", { db_ip = var.db_ip})
-    destination = "/tmp/puma.service"
+    content     = templatefile("${path.module}/files/mongod.conf", {
+      db_ip = yandex_compute_instance.db.network_interface.0.ip_address
+    })
+    destination = "/tmp/mongod.conf"
   }
 
   provisioner "remote-exec" {
